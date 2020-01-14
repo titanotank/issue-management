@@ -1,8 +1,11 @@
 package com.tuncays.issuemanagement.service.impl;
 
+import com.tuncays.issuemanagement.dto.ProjectDTO;
 import com.tuncays.issuemanagement.entity.Project;
 import com.tuncays.issuemanagement.repository.ProjectRepository;
 import com.tuncays.issuemanagement.service.ProjectService;
+import com.tuncays.issuemanagement.util.TPage;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -11,44 +14,92 @@ import org.springframework.stereotype.Service;
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
+    private final ModelMapper modelMapper;
 
-    public ProjectServiceImpl(ProjectRepository projectRepository) {
+    public ProjectServiceImpl(ProjectRepository projectRepository, ModelMapper modelMapper) {
         this.projectRepository = projectRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public Project save(Project project) {
+    public ProjectDTO save(ProjectDTO project) {
 
-        if(project.getProjectCode() == null){
-            throw new IllegalArgumentException("Project code can not be null");
+        //Aynı proje coduna göre kayıt var mı diye bakacağız
+
+        Project projectCheck = projectRepository.getByProjectCode(project.getProjectCode());
+
+        if(projectCheck != null){
+            throw new IllegalArgumentException("Project Code is exist!");
         }
 
-        project = projectRepository.save(project);
+
+
+        Project projectdb = modelMapper.map(project,Project.class);
+
+        projectdb = projectRepository.save(projectdb);
+
+        project = modelMapper.map(projectdb,ProjectDTO.class);
         return project;
     }
 
     @Override
-    public Project getById(Long id) {
-        return projectRepository.getOne(id);
+    public ProjectDTO getById(Long id) {
+
+        Project projectdb = projectRepository.getOne(id);
+
+        ProjectDTO project = modelMapper.map(projectdb,ProjectDTO.class);
+
+        return project;
     }
 
     @Override
-    public Project getByProjectCode(String projectCode) {
+    public ProjectDTO getByProjectCode(String projectCode) {
+
+        Project projectdb = projectRepository.getByProjectCode(projectCode);
+        ProjectDTO project =modelMapper.map(projectdb,ProjectDTO.class);
+
+        return project;
+    }
+
+    @Override
+    public ProjectDTO getByProjectCodeContains(String contains) {
         return null;
     }
 
     @Override
-    public Project getByProjectCodeContains(String contains) {
+    public TPage<ProjectDTO> getAllPageable(Pageable pageable) {
         return null;
     }
 
     @Override
-    public Page<Project> getAllPageable(Pageable pageable) {
-        return null;
+    public Boolean delete(Long id) {
+        projectRepository.deleteById(id);
+        return Boolean.TRUE;
     }
 
     @Override
-    public Boolean delete(Project project) {
-        return null;
+    public ProjectDTO update(Long id,ProjectDTO project) {
+
+        // Verilen id ye göre kayıt var mı
+        Project projectdb = projectRepository.getOne(id);
+
+        if(projectdb == null){
+            throw new IllegalArgumentException("Project does not exist by givin id: !" + id);
+        }
+        // Güncellenmek istenen değerde project codu varmı, kendisi haric
+        Project projectCheck = projectRepository.getByProjectCode(project.getProjectCode());
+
+        if(projectCheck != null && projectCheck.getId() != projectdb.getId()){
+            throw new IllegalArgumentException("Project Code is exist!");
+        }
+
+        // değerleri set edip yollayacağız
+        projectdb.setProjectCode(project.getProjectCode());
+        projectdb.setProjectName(project.getProjectName());
+
+        projectdb = projectRepository.save(projectdb);
+        project = modelMapper.map(projectdb,ProjectDTO.class);
+
+        return project;
     }
 }
