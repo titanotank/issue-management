@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
@@ -68,7 +70,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public TPage<ProjectDTO> getAllPageable(Pageable pageable) {
-        return null;
+        Page<Project> data = projectRepository.findAll(pageable);
+        TPage<ProjectDTO> respnose = new TPage<>();
+        respnose.setStats(data, Arrays.asList(modelMapper.map(data.getContent(), ProjectDTO[].class)));
+        return respnose;
     }
 
     @Override

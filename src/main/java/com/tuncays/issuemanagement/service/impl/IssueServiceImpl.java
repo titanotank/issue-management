@@ -8,10 +8,11 @@ import com.tuncays.issuemanagement.util.TPage;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 
-
+@Service
 public class IssueServiceImpl implements IssueService {
 
     private final IssueRepository issueRepository;
@@ -40,7 +41,12 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     public IssueDTO getById(Long id) {
-        return null;
+
+        Issue issuedb = issueRepository.getOne(id);
+
+        IssueDTO issue = modelMapper.map(issuedb,IssueDTO.class);
+
+        return issue;
     }
 
     @Override
@@ -50,15 +56,19 @@ public class IssueServiceImpl implements IssueService {
 
         TPage<IssueDTO> page = new TPage<IssueDTO>();
 
-        IssueDTO[] dtos = modelMapper.map(data,IssueDTO[].class);
-
-        page.setStats(data, Arrays.asList(dtos));
+        page.setStats(data, Arrays.asList(modelMapper.map(data.getContent(),IssueDTO[].class)));
 
         return page;
     }
 
     @Override
-    public Boolean delete(IssueDTO issue) {
+    public Boolean delete(Long id) {
+        issueRepository.deleteById(id);
+        return  Boolean.TRUE;
+    }
+
+    @Override
+    public IssueDTO update(Long id, IssueDTO issue) {
         return null;
     }
 }

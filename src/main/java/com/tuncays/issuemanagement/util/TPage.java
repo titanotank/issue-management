@@ -1,10 +1,15 @@
 package com.tuncays.issuemanagement.util;
 
+import lombok.Data;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
+/**
+ * Created by temelt on 4.02.2019.
+ */
+@Data
 public class TPage<T> {
 
     private int number;
@@ -14,7 +19,7 @@ public class TPage<T> {
     private Long totalElements;
     private List<T> content;
 
-    public void setStats(Page page, List<T> list){
+    public void setStats(Page page, List<T> list) {
         this.number = page.getNumber();
         this.size = page.getSize();
         this.sort = page.getSort();
@@ -22,5 +27,4 @@ public class TPage<T> {
         this.totalElements = page.getTotalElements();
         this.content = list;
     }
-
 }
