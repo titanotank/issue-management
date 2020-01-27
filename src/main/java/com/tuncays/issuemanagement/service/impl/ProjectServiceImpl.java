@@ -85,6 +85,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectDTO update(Long id,ProjectDTO project) {
 
+
         // Verilen id ye göre kayıt var mı
         Project projectdb = projectRepository.getOne(id);
 
